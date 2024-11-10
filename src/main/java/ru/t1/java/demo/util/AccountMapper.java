@@ -28,10 +28,14 @@ public class AccountMapper {
             return null;
         }
 
+        Long clientId = (account.getClient() != null) ? account.getClient().getId() : null;
+
+
         return AccountDTO.builder()
                 .id(account.getId())
                 .type(account.getType().name())
                 .balance(account.getBalance())
+                .clientId(clientId)
                 .build();
     }
 }

@@ -10,4 +10,6 @@ public interface TransactionService {
     Long operate(Transaction transaction);
 
     List<Transaction> parseJson() throws IOException;
+
+    void sendTransactionToKafka();
 }

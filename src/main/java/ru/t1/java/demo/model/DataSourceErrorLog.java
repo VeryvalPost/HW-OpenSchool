@@ -3,12 +3,14 @@ package ru.t1.java.demo.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serializable;
+
 @Data
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "data_source_error_log")
-public class DataSourceErrorLog {
+public class DataSourceErrorLog implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

@@ -6,12 +6,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.t1.java.demo.model.Account;
+import ru.t1.java.demo.model.Client;
 import ru.t1.java.demo.model.Transaction;
+import ru.t1.java.demo.repository.ClientRepository;
 import ru.t1.java.demo.service.AccountService;
 
 
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @Slf4j
@@ -19,10 +22,12 @@ import java.util.List;
 public class AccountController {
 
     private final AccountService accountService;
+    private final ClientRepository clientRepository;
 
     @Autowired
-    public AccountController(AccountService accountService) {
+    public AccountController(AccountService accountService, ClientRepository clientRepository) {
         this.accountService = accountService;
+        this.clientRepository = clientRepository;
     }
 
     @PostMapping
@@ -51,5 +56,12 @@ public class AccountController {
         log.info("Перечень всех транзакций для аккаунта ID: {}", id);
         List<Transaction> transactions = accountService.findAllAccountTransactions(id);
         return ResponseEntity.ok(transactions);
+    }
+
+    @GetMapping("/testKafka")
+    public ResponseEntity<String> sendAccountToKafka() {
+        log.info("Тестовая отсылка записи в топик аккаунтов ID: {}");
+        accountService.sendAccountToKafka();
+        return ResponseEntity.status(200).body("Сообщение успешно отправлено в Kafka");
     }
 }

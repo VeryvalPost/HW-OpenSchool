@@ -4,10 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
+import ru.t1.java.demo.dto.AccountDTO;
 import ru.t1.java.demo.dto.TransactionDTO;
 import ru.t1.java.demo.exception.AccountException;
+import ru.t1.java.demo.kafka.KafkaTransactionalProducer;
 import ru.t1.java.demo.model.Account;
 import ru.t1.java.demo.model.Transaction;
 import ru.t1.java.demo.repository.AccountRepository;
@@ -18,6 +21,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -25,12 +29,16 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class TransactionServiceImpl implements TransactionService {
+    @Value("${spring.kafka.topic.transactions}")
+    private String topic;
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
+    private final KafkaTransactionalProducer kafkaTransactionalProducer;
 
-    public TransactionServiceImpl(AccountRepository accountRepository, TransactionRepository transactionRepository) {
+    public TransactionServiceImpl(AccountRepository accountRepository, TransactionRepository transactionRepository, KafkaTransactionalProducer kafkaTransactionalProducer) {
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
+        this.kafkaTransactionalProducer = kafkaTransactionalProducer;
     }
 
 
@@ -78,6 +86,15 @@ public class TransactionServiceImpl implements TransactionService {
                 })
                 .collect(Collectors.toList());
     }
+
+    // Сделано для тестирования producer и consumer Kafka
+    @Override
+    public void sendTransactionToKafka() {
+        // Тестовые записи
+        TransactionDTO transaction = new TransactionDTO(1710L, 156.0, LocalDateTime.now(), 2L);
+        kafkaTransactionalProducer.sendTo(topic, transaction);
+    }
+
     @Transactional
     private void changeBalance(Transaction transaction) {
         try {

@@ -33,4 +33,11 @@ public class TransactionController {
        return ResponseEntity.ok(confirmOperation);
     }
 
+    @GetMapping("/testTransaction")
+    public ResponseEntity<String> sendAccountToKafka() {
+        log.info("Тестовая отсылка записи в топик транзакций ID: {}");
+        transactionService.sendTransactionToKafka();
+        return ResponseEntity.status(200).body("Сообщение успешно отправлено в Kafka");
+    }
+
 }

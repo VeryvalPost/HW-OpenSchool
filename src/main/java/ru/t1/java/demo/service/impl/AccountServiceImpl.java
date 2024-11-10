@@ -4,13 +4,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import ru.t1.java.demo.aop.LogDataSourceError;
+import ru.t1.java.demo.aop.Metrics;
 import ru.t1.java.demo.dto.AccountDTO;
 import ru.t1.java.demo.exception.AccountException;
 import ru.t1.java.demo.exception.ClientException;
 import ru.t1.java.demo.exception.TransactionException;
+import ru.t1.java.demo.kafka.KafkaAccountProducer;
 import ru.t1.java.demo.model.Account;
 import ru.t1.java.demo.model.AccountType;
 import ru.t1.java.demo.model.Client;
@@ -25,26 +28,29 @@ import ru.t1.java.demo.util.AccountMapper;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
 @Service
 @Slf4j
-
 public class AccountServiceImpl implements AccountService {
-
+    @Value("${spring.kafka.topic.accounts}")
+    private String topic;
     private final AccountRepository accountRepository;
     private final ClientRepository clientRepository;
 
+    private final KafkaAccountProducer kafkaAccountProducer;
+
     private final TransactionRepository transactionRepository;
-    public AccountServiceImpl(AccountRepository accountRepository, ClientRepository clientRepository, TransactionRepository transactionRepository) {
+    public AccountServiceImpl(AccountRepository accountRepository,
+                              ClientRepository clientRepository,
+                              TransactionRepository transactionRepository,
+                              KafkaAccountProducer kafkaAccountProducer) {
         this.accountRepository = accountRepository;
         this.clientRepository = clientRepository;
         this.transactionRepository = transactionRepository;
+        this.kafkaAccountProducer =kafkaAccountProducer;
     }
 
 
@@ -58,6 +64,7 @@ public class AccountServiceImpl implements AccountService {
         }
     }
     @Override
+    @Metrics(milliseconds = 100)
     @LogDataSourceError
     public Account createAccount(Account account, Long clientId) {
         try {
@@ -114,6 +121,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    @Metrics(milliseconds = 100)
     public List<Transaction> findAllAccountTransactions(Long accountId) {
         try {
             List<Transaction> transactions = transactionRepository.findAllTransactionByAccountId(accountId);
@@ -143,5 +151,17 @@ public class AccountServiceImpl implements AccountService {
                 })
                 .collect(Collectors.toList());
         }
+
+
+// Сделано для тестирования producer и consumer Kafka
+    public void sendAccountToKafka() {
+        // Пример отправки в Kafka
+        kafkaAccountProducer.sendTo(topic, new AccountDTO(1710L, "DEBIT", 156.0, 2L));
+
+        }
+
+
     }
+
+
 

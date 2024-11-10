@@ -6,6 +6,7 @@ import ru.t1.java.demo.model.Transaction;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 public interface AccountService {
     Account createAccount(Account account, Long clientId);
@@ -14,4 +15,7 @@ public interface AccountService {
     List<Transaction> findAllAccountTransactions(Long accountId);
 
     List<Account> parseJson() throws IOException;
+
+    // Сделано для тестирования producer и consumer Kafka
+    public void sendAccountToKafka() ;
 }
