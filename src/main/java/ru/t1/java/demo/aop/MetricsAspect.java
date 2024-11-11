@@ -39,17 +39,20 @@ public class MetricsAspect {
     @Pointcut("@annotation(Metrics)")
     public void metricMethods() {}
 
-    @Around("execution(* ru.t1.java.demo.*.*(..))")
+    @Around("ru.t1.java.demo.aop.MetricsAspect.metricMethods() && execution(* ru.t1.java.demo.service..*(..))")
     public Object calculateWorkingTimeExceeding(ProceedingJoinPoint joinPoint) throws Throwable {
         Metrics metrics = getMetricsAnnotation(joinPoint);
-        long startTime = System.currentTimeMillis();
+        if (metrics == null) {
+            return joinPoint.proceed();
+        }
+
+                long startTime = System.currentTimeMillis();
         log.debug("Method {} execution started", joinPoint.getSignature().getName());  // Лог до выполнения
 
         Object result = joinPoint.proceed();
         long endTime = System.currentTimeMillis();
-
         long workingTime = endTime-startTime;
-        log.debug("WorkingTime: %d ms, ",workingTime);
+
         if ((workingTime)>metrics.milliseconds()){
 
             String methodName = joinPoint.getSignature().getName();

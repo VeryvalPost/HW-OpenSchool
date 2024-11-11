@@ -22,12 +22,10 @@ import java.util.Optional;
 public class AccountController {
 
     private final AccountService accountService;
-    private final ClientRepository clientRepository;
 
     @Autowired
-    public AccountController(AccountService accountService, ClientRepository clientRepository) {
+    public AccountController(AccountService accountService) {
         this.accountService = accountService;
-        this.clientRepository = clientRepository;
     }
 
     @PostMapping
@@ -60,8 +58,13 @@ public class AccountController {
 
     @GetMapping("/testKafka")
     public ResponseEntity<String> sendAccountToKafka() {
-        log.info("Тестовая отсылка записи в топик аккаунтов ID: {}");
-        accountService.sendAccountToKafka();
-        return ResponseEntity.status(200).body("Сообщение успешно отправлено в Kafka");
+        log.info("Тестовая отсылка записи в Kafka для аккаунта");
+        try {
+            accountService.sendAccountToKafka();
+            return ResponseEntity.status(200).body("Сообщение успешно отправлено в Kafka");
+        } catch (Exception e) {
+            log.error("Ошибка при отправке сообщения в Kafka", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ошибка при отправке сообщения в Kafka");
+        }
     }
 }

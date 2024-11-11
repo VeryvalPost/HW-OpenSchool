@@ -40,13 +40,13 @@ public class AccountServiceImpl implements AccountService {
     private final AccountRepository accountRepository;
     private final ClientRepository clientRepository;
 
-    private final KafkaAccountProducer kafkaAccountProducer;
+    private final KafkaAccountProducer<AccountDTO> kafkaAccountProducer;
 
     private final TransactionRepository transactionRepository;
     public AccountServiceImpl(AccountRepository accountRepository,
                               ClientRepository clientRepository,
                               TransactionRepository transactionRepository,
-                              KafkaAccountProducer kafkaAccountProducer) {
+                              KafkaAccountProducer<AccountDTO> kafkaAccountProducer) {
         this.accountRepository = accountRepository;
         this.clientRepository = clientRepository;
         this.transactionRepository = transactionRepository;
@@ -54,7 +54,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
 
-    @PostConstruct
+   // @PostConstruct
     void init() {
         try {
             List<Account> accounts = parseJson();
@@ -75,10 +75,10 @@ public class AccountServiceImpl implements AccountService {
             currentClient.getAccounts().add(account);
             return accountRepository.save(account);
         } else {
-            throw new ClientException("Клиент не найден");
+            throw new ClientException("Клиент с ID " + clientId + " не найден");
         }
         } catch (DataAccessException e) {
-            log.error("Ошибка обращения к базе данных для : {}", clientId, e.getMessage());
+            log.error("Ошибка обращения к базе данных при создании аккаунта для клиента с ID: {}", clientId, e);
             throw new AccountException("Не получилось создать аккаунт пользователя, ошибка БД:", e);
         }
     }
@@ -126,7 +126,7 @@ public class AccountServiceImpl implements AccountService {
         try {
             List<Transaction> transactions = transactionRepository.findAllTransactionByAccountId(accountId);
             if (transactions == null || transactions.isEmpty()) {
-                log.warn("Не найдено ни одной транзакции для ", accountId);
+                log.warn("Не найдено транзакций для аккаунта с ID: {}", accountId);
                 return Collections.emptyList();
             }
             return transactions;
@@ -156,11 +156,9 @@ public class AccountServiceImpl implements AccountService {
 // Сделано для тестирования producer и consumer Kafka
     public void sendAccountToKafka() {
         // Пример отправки в Kafka
-        kafkaAccountProducer.sendTo(topic, new AccountDTO(1710L, "DEBIT", 156.0, 2L));
-
+        AccountDTO accountDTO = new AccountDTO(1710L, "DEBIT", 156.0, 2L);
+        kafkaAccountProducer.sendTo(topic, accountDTO);
         }
-
-
     }
 
 

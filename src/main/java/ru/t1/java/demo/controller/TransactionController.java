@@ -34,10 +34,15 @@ public class TransactionController {
     }
 
     @GetMapping("/testTransaction")
-    public ResponseEntity<String> sendAccountToKafka() {
-        log.info("Тестовая отсылка записи в топик транзакций ID: {}");
-        transactionService.sendTransactionToKafka();
-        return ResponseEntity.status(200).body("Сообщение успешно отправлено в Kafka");
+    public ResponseEntity<String> sendTransactionToKafka() {
+        try {
+            log.info("Тестовая отсылка транзакции в Kafka");
+            transactionService.sendTransactionToKafka();
+            return ResponseEntity.status(HttpStatus.OK).body("Сообщение успешно отправлено в Kafka");
+        } catch (Exception e) {
+            log.error("Ошибка при отправке транзакции в Kafka", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ошибка при отправке транзакции в Kafka");
+        }
     }
 
 }

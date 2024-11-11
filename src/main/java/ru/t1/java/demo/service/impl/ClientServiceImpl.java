@@ -1,11 +1,13 @@
 package ru.t1.java.demo.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.t1.java.demo.dto.ClientDto;
 import ru.t1.java.demo.kafka.KafkaClientProducer;
+import ru.t1.java.demo.model.Account;
 import ru.t1.java.demo.model.Client;
 import ru.t1.java.demo.model.dto.CheckResponse;
 import ru.t1.java.demo.repository.ClientRepository;
@@ -29,7 +31,15 @@ public class ClientServiceImpl implements ClientService {
     private final ClientRepository repository;
     private final KafkaClientProducer kafkaClientProducer;
   //  private final CheckWebClient checkWebClient;
-
+ /*  @PostConstruct
+  void init() {
+      try {
+          List<Client> clients = parseJson();
+          repository.saveAll(clients);
+      } catch (IOException e) {
+          log.error("Ошибка во время обработки записей", e);
+      }
+  }*/
 /*
     @Override
     public List<Client> registerClients(List<Client> clients) {

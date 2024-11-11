@@ -16,9 +16,6 @@ import ru.t1.java.demo.repository.ClientRepository;
 import ru.t1.java.demo.service.AccountService;
 import ru.t1.java.demo.util.AccountMapper;
 
-
-import java.util.List;
-
 @Slf4j
 @Service
 public class KafkaAccountConsumer {

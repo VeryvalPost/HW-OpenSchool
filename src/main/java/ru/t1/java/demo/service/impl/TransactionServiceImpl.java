@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
-import ru.t1.java.demo.dto.AccountDTO;
 import ru.t1.java.demo.dto.TransactionDTO;
 import ru.t1.java.demo.exception.AccountException;
 import ru.t1.java.demo.kafka.KafkaTransactionalProducer;
@@ -33,16 +32,16 @@ public class TransactionServiceImpl implements TransactionService {
     private String topic;
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
-    private final KafkaTransactionalProducer kafkaTransactionalProducer;
+    private final KafkaTransactionalProducer<TransactionDTO> kafkaTransactionalProducer;
 
-    public TransactionServiceImpl(AccountRepository accountRepository, TransactionRepository transactionRepository, KafkaTransactionalProducer kafkaTransactionalProducer) {
+    public TransactionServiceImpl(AccountRepository accountRepository, TransactionRepository transactionRepository, KafkaTransactionalProducer<TransactionDTO> kafkaTransactionalProducer) {
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
         this.kafkaTransactionalProducer = kafkaTransactionalProducer;
     }
 
 
-    @PostConstruct
+ //   @PostConstruct
     void init() {
         try {
             List<Transaction> transactions = parseJson();

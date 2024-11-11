@@ -16,22 +16,20 @@ import java.util.UUID;
 @Component
 public class KafkaTransactionalProducer<T extends TransactionDTO> {
 
-    private final KafkaTemplate <String, TransactionDTO>template;
+    private final KafkaTemplate<String, TransactionDTO> template;
 
+    public void sendTo(String topic, T transactionDTO) {
+        log.debug("Отправляем сообщение в Kafka - Topic: {}, Данные: {}", topic, transactionDTO);
 
-    public void sendTo(String topic, Object o) {
-        try {
-            template.send(MessageBuilder.withPayload(o)
-                    .setHeader(KafkaHeaders.TOPIC, topic)
-                    .setHeader(KafkaHeaders.KEY, UUID.randomUUID().toString())
-                    .build()).get();
-        } catch (Exception ex) {
-            log.error(ex.getMessage(), ex);
-        } finally {
-            template.flush();
-        }
+        template.send(MessageBuilder.withPayload(transactionDTO)
+                        .setHeader(KafkaHeaders.TOPIC, topic)
+                        .setHeader(KafkaHeaders.KEY, UUID.randomUUID().toString())
+                        .build())
+                .thenAccept(result -> log.info("Сообщение успешно отправлено в Kafka - Topic: {}, Данные: {}", topic, transactionDTO))
+                .exceptionally(ex -> {
+                    log.error("Ошибка при отправке сообщения в Kafka - Topic: {}, Данные: {}, Ошибка: {}",
+                            topic, transactionDTO, ex.getMessage(), ex);
+                    return null;
+                });
     }
-
-
-
 }
