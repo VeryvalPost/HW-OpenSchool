@@ -1,0 +1,82 @@
+[
+  {
+    "id": 1,
+    "global_account_id": "ACC-000000001",
+    "type": "DEBIT",
+    "balance": 1500.75,
+    "global_client_id": "CLT-000000001",
+    "status": "OPEN"
+  },
+  {
+    "id": 2,
+    "global_account_id": "ACC-000000002",
+    "type": "CREDIT",
+    "balance": 5000.00,
+    "global_client_id": "CLT-000000002",
+    "status": "BLOCKED"
+  },
+  {
+    "id": 3,
+    "global_account_id": "ACC-000000003",
+    "type": "DEBIT",
+    "balance": 720.40,
+    "global_client_id": "CLT-000000003",
+    "status": "CLOSED"
+  },
+  {
+    "id": 4,
+    "global_account_id": "ACC-000000004",
+    "type": "SAVINGS",
+    "balance": 300.25,
+    "global_client_id": "CLT-000000002",
+    "status": "OPEN"
+  },
+  {
+    "id": 5,
+    "global_account_id": "ACC-000000005",
+    "type": "CREDIT",
+    "balance": 10000.50,
+    "global_client_id": "CLT-000000005",
+    "status": "ARRESTED"
+  },
+  {
+    "id": 6,
+    "global_account_id": "ACC-000000006",
+    "type": "DEBIT",
+    "balance": 200.10,
+    "global_client_id": "CLT-000000001",
+    "status": "OPEN"
+  },
+  {
+    "id": 7,
+    "global_account_id": "ACC-000000007",
+    "type": "DEBIT",
+    "balance": 1700.00,
+    "global_client_id": "CLT-000000003",
+    "status": "BLOCKED"
+  },
+  {
+    "id": 8,
+    "global_account_id": "ACC-000000008",
+    "type": "CREDIT",
+    "balance": 7500.80,
+    "global_client_id": "CLT-000000004",
+    "status": "OPEN"
+  },
+  {
+    "id": 9,
+    "global_account_id": "ACC-000000009",
+    "type": "SAVINGS",
+    "balance": 500.50,
+    "global_client_id": "CLT-000000005",
+    "status": "CLOSED"
+  },
+  {
+    "id": 10,
+    "global_account_id": "ACC-000000010",
+    "type": "DEBIT",
+    "balance": 0.00,
+    "global_client_id": "CLT-000000001",
+    "status": "ARRESTED"
+  }
+]

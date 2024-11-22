@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: service-2
+  datasource:
+    url: "jdbc:postgresql://192.168.43.48:5432/t1_demo"
+    #url: "jdbc:postgresql://192.168.3.155:5432/t1_demo"
+    username: "postgres"
+    #password: "0000"
+    password: "123"
+    driverClassName: org.postgresql.Driver
+  liquibase:
+      enabled: false
+  kafka:
+    #bootstrap-servers: 192.168.3.155:9092
+    bootstrap-servers: 192.168.43.48:9092
+    topic:
+      #metrics: t1_demo_metrics
+      #transactions: t1_demo_transactions
+      #accounts: t1_demo_accounts
+      transactionsAccept : t1_demo_transaction_accept
+      transactionsResult : t1_demo_transaction_result
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      group-id: t1-demo
+  web:
+    resources:
+      add-mappings: true
+      static-locations: classpath:/static/,classpath:/public/
+security:
+  token: samiyNadejniyTokenSrazuNad0ZamenitNaChtoN1budNormalnoe
+  expiration: 12300000
+
+external:
+  service:
+    url: http://localhost:8080
+
+logging:
+  level:
+    ROOT: INFO
+    org.apache.kafka: INFO
+    org.hibernate.SQL: INFO
+
+
+transaction:
+  frequency:
+    limit: 100
+  time:
+    period: 3600

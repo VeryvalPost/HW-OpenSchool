@@ -1,0 +1,112 @@
+[
+  {
+    "id": 1,
+    "first_name": "Arlena",
+    "last_name": "Renvoise",
+    "middle_name": "Lyséa",
+    "email": "arenvoise0@infoseek.co.jp",
+    "global_client_id": "CLT-000000001",
+    "status": true,
+    "gender": "Female",
+    "ip_address": "31.244.44.122"
+  },
+  {
+    "id": 2,
+    "first_name": "Liam",
+    "last_name": "Harrington",
+    "middle_name": "James",
+    "email": "lharrington1@domain.com",
+    "global_client_id": "CLT-000000002",
+    "status": false,
+    "gender": "Male",
+    "ip_address": "192.168.1.2"
+  },
+  {
+    "id": 3,
+    "first_name": "Emma",
+    "last_name": "Williams",
+    "middle_name": "Grace",
+    "email": "ewilliams2@example.net",
+    "global_client_id": "CLT-000000003",
+    "status": true,
+    "gender": "Female",
+    "ip_address": "10.0.0.1"
+  },
+  {
+    "id": 4,
+    "first_name": "Noah",
+    "last_name": "Brown",
+    "middle_name": "Alexander",
+    "email": "nbrown3@webmail.org",
+    "global_client_id": "CLT-000000004",
+    "status": false,
+    "gender": "Male",
+    "ip_address": "172.16.5.3"
+  },
+  {
+    "id": 5,
+    "first_name": "Sophia",
+    "last_name": "Davis",
+    "middle_name": "Marie",
+    "email": "sdavis4@example.com",
+    "global_client_id": "CLT-000000005",
+    "status": true,
+    "gender": "Female",
+    "ip_address": "203.0.113.5"
+  },
+  {
+    "id": 6,
+    "first_name": "James",
+    "last_name": "Garcia",
+    "middle_name": "Edward",
+    "email": "jgarcia5@webmail.org",
+    "global_client_id": "CLT-000000006",
+    "status": false,
+    "gender": "Male",
+    "ip_address": "198.51.100.7"
+  },
+  {
+    "id": 7,
+    "first_name": "Isabella",
+    "last_name": "Martinez",
+    "middle_name": "Luna",
+    "email": "imartinez6@company.net",
+    "global_client_id": "CLT-000000007",
+    "status": true,
+    "gender": "Female",
+    "ip_address": "203.0.113.8"
+  },
+  {
+    "id": 8,
+    "first_name": "Benjamin",
+    "last_name": "Rodriguez",
+    "middle_name": "Elijah",
+    "email": "brodriguez7@mailbox.com",
+    "global_client_id": "CLT-000000008",
+    "status": false,
+    "gender": "Male",
+    "ip_address": "172.16.254.9"
+  },
+  {
+    "id": 9,
+    "first_name": "Mia",
+    "last_name": "Wilson",
+    "middle_name": "Amelia",
+    "email": "mwilson8@service.org",
+    "global_client_id": "CLT-000000009",
+    "status": true,
+    "gender": "Female",
+    "ip_address": "192.0.2.10"
+  },
+  {
+    "id": 10,
+    "first_name": "Lucas",
+    "last_name": "Anderson",
+    "middle_name": "Michael",
+    "email": "landerson9@example.net",
+    "global_client_id": "CLT-000000010",
+    "status": false,
+    "gender": "Male",
+    "ip_address": "198.18.0.11"
+  }
+]
