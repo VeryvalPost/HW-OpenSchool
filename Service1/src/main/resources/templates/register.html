@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Регистрация</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+<div class="registration-container">
+    <h2>Регистрация</h2>
+    <form id="registrationForm">
+        <div>
+            <label for="username">Имя пользователя</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <div>
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div>
+            <label for="password">Пароль</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <div>
+            <label for="role">Роль:</label>
+            <select id="role" name="role">
+                <option value="user">Пользователь</option>
+                <option value="mod">Модератор</option>
+                <option value="admin">Администратор</option>
+            </select>
+        </div>
+        <div>
+            <button type="submit">Зарегистрироваться</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const form = document.getElementById('registrationForm');
+
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+
+        const formData = new FormData(form);
+        const data = {
+            username: formData.get('username'),
+            email: formData.get('email'),
+            password: formData.get('password'),
+            roles: formData.get('role')
+        };
+
+
+        fetch('/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Успешно зарегистрировано:', data);
+            alert('Регистрация прошла успешно!');
+            localStorage.setItem('jwt', data.accessToken);
+            window.location.href = '/mainpage';
+        })
+        .catch((error) => {
+            console.error('Ошибка:', error);
+            alert('Произошла ошибка при регистрации.');
+        });
+    });
+</script>
+</body>
+</html>

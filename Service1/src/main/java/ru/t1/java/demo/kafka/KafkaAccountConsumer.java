@@ -40,7 +40,7 @@ public class KafkaAccountConsumer {
                 Client client = clientRepository.findById(accountDTO.getClientId())
                         .orElseThrow(() -> new IllegalArgumentException("Клиент с id " + accountDTO.getClientId() + " не найден"));
                 Account account = AccountMapper.toEntity(accountDTO, client);
-                accountService.createAccount(account, client.getId());
+                accountService.createAccount(account, client.getGlobalId());
 
         } catch (Exception e) {
                  log.error("Ошибка обработки сообщений для аккаунтов: {}", accountDTO.getClientId(), e);

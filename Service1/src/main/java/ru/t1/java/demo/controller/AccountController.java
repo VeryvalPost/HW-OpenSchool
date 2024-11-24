@@ -25,23 +25,23 @@ public class AccountController {
     }
 
     @PostMapping
-    public ResponseEntity<Account> createAccount(@RequestBody Account account, @RequestParam Long clientId) {
-        log.info("Создание нового аккаунта для клиента с ID: {}", clientId);
-        Account createdAccount = accountService.createAccount(account, clientId);
+    public ResponseEntity<Account> createAccount(@RequestBody Account account, @RequestParam("globalClientId") String globalClientId) {
+        log.info("Создание нового аккаунта для клиента с ID: {}", globalClientId);
+        Account createdAccount = accountService.createAccount(account, globalClientId);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdAccount);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Account> updateAccount(@PathVariable Long id, @RequestBody Account updatedAccount) {
-        log.info("Изменение аккаунта для клиента с ID: {}", id);
-        Account account = accountService.updateAccount(id, updatedAccount);
+    public ResponseEntity<Account> updateAccount(@PathVariable String globalAccountId, @RequestBody Account updatedAccount) {
+        log.info("Изменение аккаунта для клиента с ID: {}", globalAccountId);
+        Account account = accountService.updateAccount(globalAccountId, updatedAccount);
         return ResponseEntity.ok(account);
     }
 
-    @PatchMapping("/{id}/changeStatus")
-    public ResponseEntity<Void> closeAccount(@PathVariable Long id, @RequestParam AccountStatus status) {
-        log.info("Закрытие аккаунта  с ID: {}", id);
-        accountService.changeAccountStatus(id, status);
+    @PatchMapping("/{globalAccountId}/changeStatus")
+    public ResponseEntity<Void> chanceStatus(@PathVariable("globalAccountId") String globalAccountId, @RequestParam("status") AccountStatus status) {
+        log.info("Смена статуса аккаунта  с ID: {}", globalAccountId);
+        accountService.changeAccountStatus(globalAccountId, status);
         return ResponseEntity.noContent().build();
     }
 
@@ -63,4 +63,18 @@ public class AccountController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ошибка при отправке сообщения в Kafka");
         }
     }
+
+    @PostMapping("/{id}/changeBalance")
+    public ResponseEntity<String> changeBalance(@RequestBody Transaction transaction) {
+        try {
+            log.info("Выполнение изменений баланса по транзакции {}", transaction.getGlobalTransactionId());
+            accountService.changeBalance(transaction);
+            log.info("Баланс счета {} изменен на сумму {} ", transaction.getAccount().getGlobalAccountId(), transaction.getAmount());
+            return ResponseEntity.status(HttpStatus.OK).body(transaction.getGlobalTransactionId());
+        } catch (Exception e) {
+            log.error("Не удалось изменить баланс {}", transaction.getAccount().getGlobalAccountId(),  e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Не удалось изменить баланс");
+        }
+    }
+
 }

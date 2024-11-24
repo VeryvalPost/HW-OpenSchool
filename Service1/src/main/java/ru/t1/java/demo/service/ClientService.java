@@ -8,4 +8,5 @@ import java.util.List;
 public interface ClientService {
     List<Client> parseJson() throws IOException;
     Client registerClient(Client client);
+    void blockClient(String globalClientId);
 }

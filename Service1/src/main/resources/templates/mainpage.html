@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Controller Actions</title>
+    <link rel="stylesheet" href="/static/css/account.css">
+</head>
+<body>
+<h1>Main Actions</h1>
+
+<!-- Create Client -->
+<form id="createClientForm">
+    <h2>Register Client</h2>
+    <label for="clientFirstName">Client First Name:</label>
+    <input type="text" id="clientFirstName" name="FirstName" required>
+    <label for="clientLastName">Client Last Name:</label>
+    <input type="text" id="clientLastName" name="LastName" required>
+    <label for="clientMiddleName">Client Middle Name:</label>
+    <input type="text" id="clientMiddleName" name="MiddleName" required>
+    <button type="button" onclick="createClient()">Register Client</button>
+</form>
+
+<!-- Create Account -->
+<form id="createAccountForm">
+    <h2>Create Account</h2>
+    <label for="globalClientId">Client ID:</label>
+    <input type="text" id="globalClientId" name="globalClientId" required placeholder="CLT-00000001">
+    <label for="type">Account Type:</label>
+    <select id="type" name="type" required>
+        <option value="DEBIT">DEBIT</option>
+        <option value="CREDIT">CREDIT</option>
+    </select>
+    <label for="balance">Balance:</label>
+    <input type="number" step="0.01" id="balance" name="balance" required>
+    <label for="status">Status:</label>
+    <select id="status" name="status" required>
+        <option value="OPEN">OPEN</option>
+        <option value="CLOSED">CLOSED</option>
+        <option value="BLOCKED">BLOCKED</option>
+        <option value="ARRESTED">ARRESTED</option>
+    </select>
+    <button type="button" onclick="createAccount()">Create Account</button>
+</form>
+
+<!-- Change Account Status -->
+<form id="changeStatusForm">
+    <h2>Change Account Status</h2>
+    <label for="statusAccountId">Account ID:</label>
+    <input type="text" id="statusAccountId" name="statusAccountId" required>
+    <label for="newStatus">New Status:</label>
+    <select id="newStatus" name="newStatus" required>
+        <option value="ARRESTED">ARRESTED</option>
+        <option value="BLOCKED">BLOCKED</option>
+        <option value="CLOSED">CLOSED</option>
+        <option value="OPEN">OPEN</option>
+    </select>
+    <button type="button" onclick="changeAccountStatus()">Change Status</button>
+</form>
+
+
+<script>
+    const apiUrl = '/accounts';
+    const token = localStorage.getItem('jwt');
+
+    async function createClient() {
+        const firstName = document.getElementById('clientFirstName').value;
+        const lastName = document.getElementById('clientLastName').value;
+        const middleName = document.getElementById('clientMiddleName').value;
+
+        const clientData = { firstName, lastName, middleName };
+
+        try {
+            const response = await fetch('/registerClient', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(clientData)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                alert(`Client registered successfully: ${JSON.stringify(result)}`);
+            } else {
+                const error = await response.text();
+                alert(`Error: ${error}`);
+            }
+        } catch (error) {
+            alert(`Error: ${error.message}`);
+        }
+    }
+
+    async function createAccount() {
+        const globalClientId = document.getElementById('globalClientId').value;
+        const type = document.getElementById('type').value;
+        const balance = parseFloat(document.getElementById('balance').value);
+        const status = document.getElementById('status').value;
+
+        if (isNaN(balance)) {
+            alert('Enter a valid balance!');
+            return;
+        }
+
+        const accountData = { type, balance, status };
+
+        try {
+            const response = await fetch(`${apiUrl}?globalClientId=${globalClientId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`  },
+                body: JSON.stringify(accountData)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                alert(`Account created successfully: ${JSON.stringify(result)}`);
+            } else {
+                const error = await response.text();
+                alert(`Error: ${error}`);
+            }
+        } catch (error) {
+            alert(`Error: ${error.message}`);
+        }
+    }
+
+    async function changeAccountStatus() {
+        const globalAccountId = document.getElementById('statusAccountId').value;
+        const newStatus = document.getElementById('newStatus').value;
+
+        try {
+            const response = await fetch(`${apiUrl}/${globalAccountId}/changeStatus?status=${newStatus}`, {
+                method: 'PATCH'
+            });
+
+            if (response.ok) {
+                alert('Status changed successfully!');
+            } else {
+                const error = await response.text();
+                alert(`Error: ${error}`);
+            }
+        } catch (error) {
+            alert(`Error: ${error.message}`);
+        }
+    }
+
+
+</script>
+</body>
+</html>

@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,7 +29,7 @@ public class ClientServiceImpl implements ClientService {
     private final ClientRepository clientRepository;
     private final UniqueIdGeneratorService generatorService;
 
-    @PostConstruct
+   // @PostConstruct
     void init() {
         try {
             List<Client> clients = parseJson();
@@ -64,6 +65,17 @@ public class ClientServiceImpl implements ClientService {
         } catch (DataAccessException e) {
             log.error("Ошибка обращения к базе данных при создании  клиента с ID: {}", client.getId(), e);
             throw new AccountException("Не получилось создать пользователя, ошибка БД:", e);
+        }
+    }
+
+    public void blockClient(String globalClientId){
+
+        Optional<Client> clientOpt = clientRepository.findClientByGlobalId(globalClientId);
+        if (clientOpt.isPresent()) {
+            Client client = clientOpt.get();
+            client.setStatus(false);
+            log.info("Блокирую клиента из блэклиста: {}", globalClientId);
+            clientRepository.save(client);
         }
     }
 }

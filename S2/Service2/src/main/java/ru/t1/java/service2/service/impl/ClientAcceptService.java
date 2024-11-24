@@ -13,7 +13,7 @@ import java.util.Optional;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class ClientService {
+public class ClientAcceptService {
     private final ClientRepository clientRepository;
 
 
@@ -24,15 +24,6 @@ public class ClientService {
         // Теоретически можно было создать еще одну таблицу в БД и связать с клиентами
         BlackListGenerator generator = new BlackListGenerator();
         isBlocked = generator.generate(globalClientId);
-
-        if (isBlocked) {
-            Optional<Client> clientOpt = clientRepository.findClientByGlobalId(globalClientId);
-            if (clientOpt.isPresent()) {
-                Client client = clientOpt.get();
-                client.setStatus(false);
-                clientRepository.save(client);
-            }
-        }
 
         return isBlocked;
     }

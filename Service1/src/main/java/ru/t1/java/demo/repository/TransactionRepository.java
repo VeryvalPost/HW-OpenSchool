@@ -24,4 +24,9 @@ public interface TransactionRepository extends JpaRepository<Transaction,Long> {
             @Param("startTime") LocalDateTime startTime
     );
 
+    @Query("SELECT t FROM Transaction t WHERE t.account.globalAccountId = :globalAccountId")
+    List<Transaction> findAllLastTransactions(
+            @Param("globalAccountId") String globalAccountId
+    );
+
 }

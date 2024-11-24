@@ -48,8 +48,8 @@ public class TransactionServiceImpl implements TransactionService {
     public TransactionServiceImpl(TransactionRepository transactionRepository,
                                   AccountRepository accountRepository,
                                   KafkaTransactionalProducer<TransactionDTO> kafkaTransactionalProducer,
-                                  UniqueIdGeneratorService idGenerator,
-                                  CheckWebClientService webClientService) {
+                                  UniqueIdGeneratorService idGenerator
+                                  ) {
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
         this.kafkaTransactionalProducer = kafkaTransactionalProducer;
@@ -110,7 +110,7 @@ public class TransactionServiceImpl implements TransactionService {
         transactionRepository.save(transaction);
         TransactionDTO transactionDTO = TransactionMapper.toDto(transaction);
         kafkaTransactionalProducer.sendTo(topicTransactionsResult, transactionDTO);
-        log.info("Сообщение для транзакции ID {} отправлено в топик {}", transaction.getGlobalTransactionId(), topicTransactionsResult);
+        log.info("Транзакция блокирована. Сообщение для транзакции ID {} отправлено в топик {}", transaction.getGlobalTransactionId(), topicTransactionsResult);
         return TransactionStatus.REJECTED.name();
     }
 }

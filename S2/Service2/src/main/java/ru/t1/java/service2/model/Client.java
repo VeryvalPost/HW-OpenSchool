@@ -30,7 +30,7 @@ public class Client extends AbstractPersistable<Long> {
     private String middleName;
 
     @Column(name = "status")
-    private boolean status;
+    private Boolean status;
 
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
     @JsonManagedReference

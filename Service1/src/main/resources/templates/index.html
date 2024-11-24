@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Добро пожаловать</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+<div class="welcome-container">
+    <h1>Добро пожаловать!</h1>
+    <p>Выберите действие:</p>
+    <div class="buttons">
+        <a th:href="@{/login}" class="btn">Войти</a>
+        <p></p>
+        <a th:href="@{/register}" class="btn">Зарегистрироваться</a>
+    </div>
+</div>
+</body>
+</html>

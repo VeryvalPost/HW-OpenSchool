@@ -12,6 +12,7 @@ import ru.t1.java.demo.model.*;
 import ru.t1.java.demo.repository.AccountRepository;
 import ru.t1.java.demo.repository.TransactionRepository;
 import ru.t1.java.demo.service.AccountService;
+import ru.t1.java.demo.service.ClientService;
 import ru.t1.java.demo.service.TransactionOperator;
 import ru.t1.java.demo.service.TransactionService;
 import ru.t1.java.demo.web.CheckWebClientService;
@@ -28,6 +29,10 @@ public class TransactionsOperator implements TransactionOperator {
 
     @Value("${spring.kafka.topic.transactionsResult}")
     private String topicTransactionsResult;
+
+    @Value("${transaction.rejection}")
+    private long rejectedTransactionLimit;
+
     @Autowired
     private final TransactionService transactionService;
     @Autowired
@@ -40,18 +45,22 @@ public class TransactionsOperator implements TransactionOperator {
 
     @Autowired
     private final AccountService accountService;
+    @Autowired
+    private final  ClientService clientService;
 
 
     public TransactionsOperator(TransactionService transactionService,
                                 TransactionRepository transactionRepository,
                                 AccountRepository accountRepository,
                                 CheckWebClientService webClientService,
-                                AccountService accountService) {
+                                AccountService accountService,
+                                ClientService clientService) {
         this.transactionService = transactionService;
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
         this.webClientService = webClientService;
         this.accountService = accountService;
+        this.clientService = clientService;
     }
 
     @Override
@@ -61,16 +70,54 @@ public class TransactionsOperator implements TransactionOperator {
     /*
      К заданию с обработкой транзакций и проверкой статусов BLOCKED у клиента.
      */
+        Boolean clientStatus = transaction.getAccount().getClient().getStatus();
+        log.debug("Статус клиента: {} для транзакции ID: {}", clientStatus, transaction.getGlobalTransactionId());
 
-        checkBlockedClientAtNewTransaction(transaction);
+        if (clientStatus == null) {
+            log.info("Статус клиента не определен, выполняется проверка на блокировку, транзакция ID: {}", transaction.getGlobalTransactionId());
 
+            if (checkBlockedClientAtNewTransaction(transaction)) {
+                log.warn("Клиент заблокирован, инициируем блокировку клиента, счета и транзакции, транзакция ID: {}", transaction.getGlobalTransactionId());
 
+                clientService.blockClient(transaction.getAccount().getClient().getGlobalId());
+                log.info("Клиент с ID {} успешно заблокирован", transaction.getAccount().getClient().getGlobalId());
+
+                accountService.blockAccount(transaction.getGlobalAccountId());
+                log.info("Счет с ID {} успешно заблокирован", transaction.getGlobalAccountId());
+
+                transactionService.blockTransaction(transaction);
+                log.info("Транзакция с ID {} успешно заблокирована", transaction.getGlobalTransactionId());
+                return;
+            }
+        } else if (transaction.getStatus().equals(TransactionStatus.REJECTED)) {
+            log.info("Обработка транзакции с отклоненным статусом (REJECTED), транзакция ID: {}", transaction.getGlobalTransactionId());
+
+            List<Transaction> transactionList = transactionRepository.findAllLastTransactions(transaction.getGlobalAccountId());
+            log.debug("Найдено {} последних транзакций для счета ID {}", transactionList.size(), transaction.getGlobalAccountId());
+
+            long allRejectedTransactions = transactionList.stream()
+                    .filter(t -> t.getStatus().equals(TransactionStatus.REJECTED))
+                    .count();
+            log.debug("Количество отклоненных транзакций: {} для счета ID {}", allRejectedTransactions, transaction.getGlobalAccountId());
+
+            if (allRejectedTransactions > rejectedTransactionLimit) {
+                log.warn("Превышен лимит отклоненных транзакций для счета ID {}, блокируем счет", transaction.getGlobalAccountId());
+                accountService.changeAccountStatus(transaction.getGlobalAccountId(), AccountStatus.ARRESTED);
+                log.info("Счет с ID {} переведен в статус ARRESTED", transaction.getGlobalAccountId());
+            }
+        }
+    /*
+     Если по условиям 4ог задания все отлично, то продолжаем как ранее.
+     */
         if (topic.equals(topicTransactions)) {
+            log.info("Обработка транзакции по топику: {}, транзакция ID: {}", topic, transaction.getGlobalTransactionId());
             operateTransactionMessage(transaction);
         } else if (topic.equals(topicTransactionsResult)) {
+            log.info("Обработка результата транзакции из топика: {}, транзакция ID: {}", topic, transaction.getGlobalTransactionId());
             operateTransactionResult(transaction);
+        } else {
+            log.warn("Неизвестный топик: {}, транзакция ID {}", topic, transaction.getGlobalTransactionId());
         }
-        log.warn("Неизвестный топик: {}, транзакция ID {}", topic, transaction.getGlobalTransactionId());
     }
 
     /*
@@ -161,10 +208,11 @@ public class TransactionsOperator implements TransactionOperator {
 
     public boolean checkBlockedClientAtNewTransaction(Transaction transaction) {
         String globalClientId = transaction.getAccount().getClient().getGlobalId();
+        String globalAccountId = transaction.getAccount().getGlobalAccountId();
         try {
-            return webClientService.isClientBlacklisted(globalClientId);
+            return webClientService.isClientBlacklisted(globalClientId, globalAccountId);
         } catch (ExternalServiceException e) {
-            log.error("Ошибка при проверке клиента {}: {}", globalClientId, e.getMessage(), e);
+            log.error("Ошибка при проверке клиента {} с аккаунтом {}: {}", globalClientId, globalAccountId, e.getMessage(), e);
             return false;
         }
     }

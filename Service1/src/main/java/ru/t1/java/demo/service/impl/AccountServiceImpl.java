@@ -2,6 +2,7 @@ package ru.t1.java.demo.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.common.protocol.types.Field;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -64,59 +65,57 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @Metrics(milliseconds = 100)
     @LogDataSourceError
-    public Account createAccount(Account account, Long clientId) {
+    public Account createAccount(Account account, String globalClientId) {
         try {
-        Optional<Client> clientOpt = clientRepository.findById(clientId);
+        Optional<Client> clientOpt = clientRepository.findClientByGlobalId(globalClientId);
         if (clientOpt.isPresent()) {
             Client currentClient = clientOpt.get();
             account.setClient(currentClient);
             account.setGlobalAccountId(idGenerator.generateId(EntityType.ACCOUNT));
-            Set<Account> accounts = new HashSet<>(currentClient.getAccounts());
-            accounts.add(account);
-            currentClient.setAccounts(accounts);
+
             return accountRepository.save(account);
         } else {
-            throw new ClientException("Клиент с ID " + clientId + " не найден");
+            throw new ClientException("Клиент с ID " + globalClientId + " не найден");
         }
         } catch (DataAccessException e) {
-            log.error("Ошибка обращения к базе данных при создании аккаунта для клиента с ID: {}", clientId, e);
+            log.error("Ошибка обращения к базе данных при создании аккаунта для клиента с ID: {}", globalClientId, e);
             throw new AccountException("Не получилось создать аккаунт пользователя, ошибка БД:", e);
         }
     }
 
     @Override
     @LogDataSourceError
-    public Account updateAccount(Long accountId, Account updatedAccount) {
+    public Account updateAccount(String globalAccountId, Account updatedAccount) {
         try {
-            Optional<Account> existingAccountOpt = accountRepository.findById(accountId);
+            Optional<Account> existingAccountOpt = accountRepository.findAccountByGlobalAccountId(globalAccountId);
             if (existingAccountOpt.isPresent()) {
                 Account existingAccount = existingAccountOpt.get();
                 existingAccount.setType(updatedAccount.getType());
                 existingAccount.setBalance(updatedAccount.getBalance());
                 return accountRepository.save(existingAccount);
             } else {
-                throw new AccountException("Аккаунт не найден ID" + accountId);
+                throw new AccountException("Аккаунт не найден ID" + globalAccountId);
             }
         } catch (DataAccessException e) {
-            log.error("Ошибка обращения к базе данных для : {}", accountId, e);
+            log.error("Ошибка обращения к базе данных для : {}", globalAccountId, e);
             throw new AccountException("Не получилось обновить аккаунт пользователя, ошибка БД:", e);
         }
     }
 
     @Override
     @LogDataSourceError
-    public void changeAccountStatus(Long accountId,AccountStatus status) {
+    public void changeAccountStatus(String globalAccountId,AccountStatus status) {
         try {
-            Optional<Account> existingAccountOpt = accountRepository.findById(accountId);
+            Optional<Account> existingAccountOpt = accountRepository.findAccountByGlobalAccountId(globalAccountId);
             if (existingAccountOpt.isPresent()) {
                 Account existingAccount = existingAccountOpt.get();
                 existingAccount.setStatus(status);
                 accountRepository.save(existingAccount);
             } else {
-                throw new AccountException("Аккаунт не найден ID" + accountId);
+                throw new AccountException("Аккаунт не найден ID" + globalAccountId);
             }
         } catch (DataAccessException e) {
-            log.error("Ошибка обращения к базе данных для : {}", accountId, e);
+            log.error("Ошибка обращения к базе данных для : {}", globalAccountId, e);
             throw new AccountException("Не получается закрыть счет, ошибка БД:", e);
         }
     }
@@ -161,6 +160,19 @@ public class AccountServiceImpl implements AccountService {
        // kafkaAccountProducer.sendTo(topic, accountDTO);
         }
 
+        /*
+        К заданию №4
+                 */
+    @Override
+    public void blockAccount(String globalAccountId) {
+        Optional<Account> optAccount = accountRepository.findAccountByGlobalAccountId(globalAccountId);
+        if (optAccount.isPresent()){
+            Account account = optAccount.get();
+            account.setStatus(AccountStatus.BLOCKED);
+            accountRepository.save(account);
+            log.info("Блокирую аккаунт(счет): {}", globalAccountId);
+        }
+    }
 
 
     @Transactional

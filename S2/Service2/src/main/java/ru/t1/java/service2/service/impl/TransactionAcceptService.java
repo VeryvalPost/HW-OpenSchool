@@ -89,6 +89,4 @@ public class TransactionAcceptService {
         kafkaTransactionalProducer.sendTo(topicTransactionsResult, transactionDTO);
         log.info("Сообщение для транзакции ID {} отправлено в топик {}", transaction.getGlobalTransactionId(), topicTransactionsResult);
     }
-
-
 }

@@ -36,7 +36,7 @@ public class Account  extends AbstractPersistable<Long> {
     private Double frozenAmount;
 
     @ManyToOne
-    @JoinColumn(name = "global_client_id")
+    @JoinColumn(name = "global_client_id", referencedColumnName = "global_client_id")
     @JsonBackReference
     private Client client;
 

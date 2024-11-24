@@ -8,10 +8,10 @@ import java.io.IOException;
 import java.util.List;
 
 public interface AccountService {
-    Account createAccount(Account account, Long clientId);
-    Account updateAccount(Long accountId, Account updatedAccount) ;
-    void changeAccountStatus(Long accountId, AccountStatus status);
-    List<Transaction> findAllAccountTransactions(String accountGlobalId);
+    Account createAccount(Account account, String globalClientId);
+    Account updateAccount(String globalAccountId, Account updatedAccount) ;
+    void changeAccountStatus(String globalAccountId, AccountStatus status);
+    List<Transaction> findAllAccountTransactions(String globalAccountId);
 
     List<Account> parseJson() throws IOException;
 
@@ -19,4 +19,8 @@ public interface AccountService {
 
     // Сделано для тестирования producer и consumer Kafka
     void sendAccountToKafka() ;
+/*
+К заданию №4
+ */
+    void blockAccount(String globalAccountId);
 }
