@@ -178,7 +178,7 @@ public class AccountServiceImpl implements AccountService {
     @Transactional
     public void changeBalance(Transaction transaction) {
         try {
-            Optional<Account> curAccount = accountRepository.findById(transaction.getAccount().getId());
+            Optional<Account> curAccount = accountRepository.findAccountByGlobalAccountId(transaction.getAccount().getGlobalAccountId());
             log.info("Обрабатываем транзакцию, ID: {}, сумма: {}, счет: {}",
                     transaction.getGlobalTransactionId(),
                     transaction.getAmount(),
@@ -187,8 +187,10 @@ public class AccountServiceImpl implements AccountService {
             if (curAccount.isPresent()) {
                 Double balance = curAccount.get().getBalance();
                 Double amount = transaction.getAmount();
-                curAccount.get().setBalance(balance + amount);
-                log.info("Изменен баланс" + transaction.getAccount() + " на сумму" + transaction.getAmount());
+                Account account = curAccount.get();
+                account.setBalance(balance + amount);
+                accountRepository.save(account);
+                log.info("Изменен баланс" + transaction.getAccount().getGlobalAccountId() + " на сумму" + transaction.getAmount());
             }
         } catch (DataAccessException e) {
             log.error("Ошибка обращения к базе данных для : {}", e.getMessage());

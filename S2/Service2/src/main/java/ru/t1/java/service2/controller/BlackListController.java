@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.t1.java.service2.dto.CheckRequest;
 import ru.t1.java.service2.dto.CheckResponse;
 import ru.t1.java.service2.service.impl.ClientAcceptService;
-import ru.t1.java.service2.util.JwtUtils;
 
 @RestController
 @Slf4j

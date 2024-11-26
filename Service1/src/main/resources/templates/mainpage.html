@@ -58,6 +58,16 @@
     <button type="button" onclick="changeAccountStatus()">Change Status</button>
 </form>
 
+<!-- Check if Client is Blacklisted -->
+<form id="checkClientForm">
+    <h2>Check Client Blacklist Status</h2>
+    <label for="checkGlobalClientId">Client ID:</label>
+    <input type="text" id="checkGlobalClientId" name="globalClientId" required placeholder="CLT-00000001">
+    <label for="checkGlobalAccountId">Account ID:</label>
+    <input type="text" id="checkGlobalAccountId" name="globalAccountId" required placeholder="ACT-00000001">
+    <button type="button" onclick="checkClientStatus()">Check Blacklist Status</button>
+    <p id="blacklistStatusResult"></p>
+</form>
 
 <script>
     const apiUrl = '/accounts';
@@ -120,7 +130,28 @@
             alert(`Error: ${error.message}`);
         }
     }
+    async function checkClientStatus() {
+        const globalClientId = document.getElementById('checkGlobalClientId').value;
+        const globalAccountId = document.getElementById('checkGlobalAccountId').value;
 
+        try {
+            const response = await fetch(`/checkClient?globalClientId=${globalClientId}&globalAccountId=${globalAccountId}`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            const result = document.getElementById('blacklistStatusResult');
+            if (response.ok) {
+                const data = await response.json();
+                result.innerText = `Client Blacklist Status: ${data.blocked ? 'Blocked' : 'Not Blocked'}`;
+            } else {
+                const error = await response.text();
+                result.innerText = `Error: ${error}`;
+            }
+        } catch (error) {
+            document.getElementById('blacklistStatusResult').innerText = `Error: ${error.message}`;
+        }
+    }
     async function changeAccountStatus() {
         const globalAccountId = document.getElementById('statusAccountId').value;
         const newStatus = document.getElementById('newStatus').value;
@@ -138,6 +169,29 @@
             }
         } catch (error) {
             alert(`Error: ${error.message}`);
+        }
+    }
+
+        async function checkClientStatus() {
+        const globalClientId = document.getElementById('checkGlobalClientId').value;
+        const globalAccountId = document.getElementById('checkGlobalAccountId').value;
+
+        try {
+            const response = await fetch(`/client/checkClient?globalClientId=${globalClientId}&globalAccountId=${globalAccountId}`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            const result = document.getElementById('blacklistStatusResult');
+            if (response.ok) {
+                const data = await response.json();
+                result.innerText = `Client Blacklist Status: ${data.blocked ? 'Blocked' : 'Not Blocked'}`;
+            } else {
+                const error = await response.text();
+                result.innerText = `Error: ${error}`;
+            }
+        } catch (error) {
+            document.getElementById('blacklistStatusResult').innerText = `Error: ${error.message}`;
         }
     }
 

@@ -143,20 +143,17 @@ public class TransactionsOperator implements TransactionOperator {
                 List<Transaction> transactions = transactionRepository.findAllTransactionByGlobalAccountId(blockedAccount.getGlobalAccountId());
                 List<Transaction> filteredTransactions = transactions.stream()
                         .filter(t -> t.getStatus() == TransactionStatus.REQUESTED)
-                        .peek(t -> t.setStatus(TransactionStatus.BLOCKED))
                         .toList();
-                log.info("Найдено {} транзакций со статусом REQUESTED для блокировки", filteredTransactions.size());
-
-
                 double frozenAmount = 0.0;
                 for (Transaction trans : filteredTransactions) {
+                    trans.setStatus(TransactionStatus.BLOCKED);
                     accountService.changeBalance(trans);
                     frozenAmount += trans.getAmount();
                     transactionRepository.save(trans);
                     log.info("Транзакция с ID {} обновлена на BLOCKED и баланс скорректирован", trans.getGlobalTransactionId());
                 }
 
-
+                log.info("Найдено {} транзакций со статусом REQUESTED для блокировки", filteredTransactions.size());
                 blockedAccount.setFrozenAmount(frozenAmount);
                 accountRepository.save(blockedAccount);
                 log.info("Замороженная сумма на счете ID {} установлена в {}", blockedAccount.getGlobalAccountId(), frozenAmount);
@@ -167,7 +164,7 @@ public class TransactionsOperator implements TransactionOperator {
             throw new AccountException("Не удалось выполнить операцию транзакции, ошибка БД:", e);
         }
 
-        return TransactionStatus.CANCELLED.name();
+        return transaction.getStatus().name();
     }
 
     @Transactional

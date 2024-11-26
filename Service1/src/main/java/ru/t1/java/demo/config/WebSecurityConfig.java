@@ -2,6 +2,7 @@ package ru.t1.java.demo.config;
 
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,11 +22,22 @@ import ru.t1.java.demo.util.JwtUtils;
 
 @Configuration
 @EnableMethodSecurity
-@RequiredArgsConstructor
+
 public class WebSecurityConfig {
+    @Autowired
     private final UserDetailsServiceImpl userDetailsService;
+    @Autowired
     private final JwtUtils jwtUtils;
+    @Autowired
     private final AuthEntryPointJwt unauthorizedHandler;
+
+    public WebSecurityConfig(UserDetailsServiceImpl userDetailsService,
+                             JwtUtils jwtUtils,
+                             AuthEntryPointJwt unauthorizedHandler) {
+        this.userDetailsService = userDetailsService;
+        this.jwtUtils = jwtUtils;
+        this.unauthorizedHandler = unauthorizedHandler;
+    }
 
     @Bean
     public AuthTokenFilter authenticationJwtTokenFilter() {

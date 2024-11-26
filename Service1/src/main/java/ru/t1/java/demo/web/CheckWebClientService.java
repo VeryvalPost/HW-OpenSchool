@@ -7,7 +7,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 import ru.t1.java.demo.dto.CheckRequest;
 import ru.t1.java.demo.dto.CheckResponse;
@@ -16,9 +15,8 @@ import ru.t1.java.demo.exception.ExternalServiceException;
 import java.util.Objects;
 import java.util.Optional;
 
-
-@Component
 @Slf4j
+@Component
 public class CheckWebClientService {
     @Value("${external.service.url}")
     private String externalServiceUrl;
@@ -42,6 +40,7 @@ public class CheckWebClientService {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(jwtToken);
+        headers.setContentType(MediaType.APPLICATION_JSON);
 
         CheckRequest checkRequest = CheckRequest.builder()
                 .globalClientId(globalClientId)

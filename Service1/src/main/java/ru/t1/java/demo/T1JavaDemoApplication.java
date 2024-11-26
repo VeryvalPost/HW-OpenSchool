@@ -3,9 +3,11 @@ package ru.t1.java.demo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Profile;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "ru.t1.java.demo")
 @Slf4j
+@Profile("main")
 public class T1JavaDemoApplication {
 
     public static void main(String[] args) {

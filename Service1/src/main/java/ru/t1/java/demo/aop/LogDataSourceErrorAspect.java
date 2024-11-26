@@ -26,7 +26,7 @@ public class LogDataSourceErrorAspect {
     @Value("${spring.kafka.topic.metrics}")
     private String topic;
 
-    @Autowired
+
     public LogDataSourceErrorAspect(ErrorLogService errorLogService, KafkaErrorLogProducer kafkaErrorLogProducer) {
         this.errorLogService = errorLogService;
         this.kafkaErrorLogProducer = kafkaErrorLogProducer;
