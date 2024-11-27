@@ -2,13 +2,10 @@ package ru.t1.java.demo.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.common.protocol.types.Field;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.t1.java.demo.aop.LogDataSourceError;
-import ru.t1.java.demo.aop.Metrics;
 import ru.t1.java.demo.dto.AccountDTO;
 import ru.t1.java.demo.exception.AccountException;
 import ru.t1.java.demo.exception.ClientException;
@@ -21,6 +18,8 @@ import ru.t1.java.demo.repository.TransactionRepository;
 import ru.t1.java.demo.service.AccountService;
 import ru.t1.java.demo.service.UniqueIdGeneratorService;
 import ru.t1.java.demo.util.AccountMapper;
+import t1.demo.starter.aop.LogDataSourceError;
+import t1.demo.starter.aop.Metrics;
 
 import java.io.File;
 import java.io.IOException;
@@ -63,8 +62,6 @@ public class AccountServiceImpl implements AccountService {
         }
     }
     @Override
-    @Metrics(milliseconds = 100)
-    @LogDataSourceError
     public Account createAccount(Account account, String globalClientId) {
         try {
         Optional<Client> clientOpt = clientRepository.findClientByGlobalId(globalClientId);
@@ -84,7 +81,6 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    @LogDataSourceError
     public Account updateAccount(String globalAccountId, Account updatedAccount) {
         try {
             Optional<Account> existingAccountOpt = accountRepository.findAccountByGlobalAccountId(globalAccountId);
@@ -103,7 +99,6 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    @LogDataSourceError
     public void changeAccountStatus(String globalAccountId,AccountStatus status) {
         try {
             Optional<Account> existingAccountOpt = accountRepository.findAccountByGlobalAccountId(globalAccountId);
@@ -121,8 +116,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
    @Override
-    @Metrics(milliseconds = 100)
-    public List<Transaction> findAllAccountTransactions(String globalAccountId) {
+   public List<Transaction> findAllAccountTransactions(String globalAccountId) {
         try {
             List<Transaction> transactions = transactionRepository.findAllTransactionByGlobalAccountId(globalAccountId);
             if (transactions == null || transactions.isEmpty()) {
@@ -176,6 +170,8 @@ public class AccountServiceImpl implements AccountService {
 
 
     @Transactional
+    @Metrics
+    @LogDataSourceError
     public void changeBalance(Transaction transaction) {
         try {
             Optional<Account> curAccount = accountRepository.findAccountByGlobalAccountId(transaction.getAccount().getGlobalAccountId());

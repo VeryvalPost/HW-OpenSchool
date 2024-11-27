@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS transactions
     id  BIGSERIAL PRIMARY KEY,
     global_account_id VARCHAR(255),
     amount DOUBLE PRECISION,
+    status VARCHAR(255),
     transaction_date TIMESTAMP,
     global_transaction_id VARCHAR(255) UNIQUE,
     CONSTRAINT fk_transaction_account FOREIGN KEY (global_account_id) REFERENCES account(global_account_id) ON DELETE CASCADE

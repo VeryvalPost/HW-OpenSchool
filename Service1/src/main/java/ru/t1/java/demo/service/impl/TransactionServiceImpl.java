@@ -18,6 +18,7 @@ import ru.t1.java.demo.service.TransactionService;
 import ru.t1.java.demo.service.UniqueIdGeneratorService;
 import ru.t1.java.demo.util.TransactionMapper;
 import ru.t1.java.demo.web.CheckWebClientService;
+import t1.demo.starter.aop.LogDataSourceError;
 
 import java.io.File;
 import java.io.IOException;

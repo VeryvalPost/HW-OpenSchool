@@ -3,17 +3,17 @@ spring:
     name: t1-demo
 
   datasource:
-    #url: "jdbc:postgresql://192.168.43.48:5432/t1_demo"
-    url: "jdbc:postgresql://192.168.3.155:5432/t1_demo"
+    url: "jdbc:postgresql://192.168.43.48:5432/t1_demo"
+    #url: "jdbc:postgresql://192.168.3.155:5432/t1_demo"
     username: "postgres"
     password: "123"
     driverClassName: org.postgresql.Driver
   liquibase:
-    enabled: false
+    enabled: true
     change-log: classpath:/db/changelog/db.changelog-master.xml
   kafka:
-    bootstrap-servers: 192.168.3.155:9092
-    #bootstrap-servers: 192.168.43.48:9092
+    #bootstrap-servers: 192.168.3.155:9092
+    bootstrap-servers: 192.168.43.48:9092
     topic:
       metrics: t1_demo_metrics
       transactions: t1_demo_transactions
@@ -28,6 +28,7 @@ spring:
       group-id: t1-demo
 
   thymeleaf:
+    enabled: true
     prefix: classpath:/templates/
     suffix: .html
     mode: HTML
@@ -57,8 +58,6 @@ logging:
     #ru.t1.java.demo.service.impl.AccountServiceImpl: DEBUG
     #ru.t1.java.demo.controller.AccountController: DEBUG
 
-t1:
-  scan-path: ru.t1.java.demo
 
 transaction:
   frequency:
@@ -67,20 +66,39 @@ transaction:
     period: 3600
   rejection: 10
 
+
+DemoAnnotationStarter:
+  kafka:
+    #bootstrap-servers: 192.168.3.155:9092
+    bootstrap-servers: 192.168.43.48:9092
+    topic:
+      metrics: t1_demo_metrics
+    consumer:
+      group-id: t1-demo
+  datasource:
+    url: jdbc:postgresql://192.168.43.48:5432/t1_demo
+    username: "postgres"
+    password: "123"
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+
 ---
 
-  spring:
-    config:
-      activate:
-        on-profile: main
-  server:
-    port: 8080
+spring:
+  config:
+    activate:
+      on-profile: main
+server:
+  port: 8080
 
 ---
-    spring:
-      config:
-        activate:
-          on-profile: second
-    server:
-      port: 8081
+spring:
+  config:
+    activate:
+      on-profile: second
+server:
+  port: 8081
 

@@ -13,7 +13,7 @@ import java.util.UUID;
 @Component
 public class KafkaClientProducer<T extends ClientDto> {
 
-    private final KafkaTemplate template;
+    private final KafkaTemplate<String, Long> template;
 
     public void send(Long clientId) {
         try {
@@ -25,7 +25,7 @@ public class KafkaClientProducer<T extends ClientDto> {
         }
     }
 
-    public void sendTo(String topic, Object o) {
+    public void sendTo(String topic, Long o) {
         try {
             template.send(topic, o).get();
         } catch (Exception ex) {
