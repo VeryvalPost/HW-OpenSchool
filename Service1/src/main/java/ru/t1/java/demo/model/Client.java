@@ -1,10 +1,9 @@
-package ru.t1.java.service3.model;
+package ru.t1.java.demo.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.jpa.domain.AbstractPersistable;
-import ru.t1.java.demo.model.Account;
 
 import java.util.HashSet;
 import java.util.Set;

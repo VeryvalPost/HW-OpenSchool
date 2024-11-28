@@ -1,15 +1,10 @@
-package ru.t1.java.service3.model;
+package ru.t1.java.demo.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.jpa.domain.AbstractPersistable;
-import ru.t1.java.demo.model.AccountStatus;
-import ru.t1.java.demo.model.AccountType;
-import ru.t1.java.demo.model.Client;
-import ru.t1.java.demo.model.Transaction;
-
 
 import java.util.List;
 
@@ -41,7 +36,7 @@ public class Account  extends AbstractPersistable<Long> {
     private Double frozenAmount;
 
     @ManyToOne
-    @JoinColumn(name = "global_client_id")
+    @JoinColumn(name = "global_client_id", referencedColumnName = "global_client_id")
     @JsonBackReference
     private Client client;
 

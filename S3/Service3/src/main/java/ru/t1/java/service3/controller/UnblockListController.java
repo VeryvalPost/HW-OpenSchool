@@ -4,8 +4,8 @@ package ru.t1.java.service3.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.t1.java.service3.dto.UnblockRequest;
-import ru.t1.java.service3.dto.UnblockResponse;
+import ru.t1.java.demo.dto.UnblockRequest;
+import ru.t1.java.demo.dto.UnblockResponse;
 import ru.t1.java.service3.service.ListUnblockService;
 
 import java.util.List;
