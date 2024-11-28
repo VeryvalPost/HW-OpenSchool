@@ -4,11 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.t1.java.demo.model.Account;
-import ru.t1.java.demo.model.AccountStatus;
-import ru.t1.java.demo.model.Client;
-import ru.t1.java.demo.repository.AccountRepository;
-import ru.t1.java.demo.repository.ClientRepository;
+import ru.t1.java.service3.model.Account;
+import ru.t1.java.service3.model.AccountStatus;
+import ru.t1.java.service3.model.Client;
+import ru.t1.java.service3.repository.AccountRepository;
+import ru.t1.java.service3.repository.ClientRepository;
+
 
 import java.util.ArrayList;
 import java.util.List;

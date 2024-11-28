@@ -5,10 +5,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.jpa.domain.AbstractPersistable;
-import ru.t1.java.demo.model.AccountStatus;
-import ru.t1.java.demo.model.AccountType;
-import ru.t1.java.demo.model.Client;
-import ru.t1.java.demo.model.Transaction;
+
 
 
 import java.util.List;
