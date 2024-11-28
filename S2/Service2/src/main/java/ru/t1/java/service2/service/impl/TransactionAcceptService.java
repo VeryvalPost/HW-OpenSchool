@@ -2,6 +2,7 @@ package ru.t1.java.service2.service.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.t1.java.service2.dto.TransactionDTO;
@@ -30,9 +31,9 @@ public class TransactionAcceptService {
 
     @Value("${spring.kafka.topic.transactionsResult}")
     private String topicTransactionsResult;
-
-    private final ru.t1.java.service2.repository.TransactionRepository transactionRepository;
-    private final ru.t1.java.service2.kafka.KafkaTransactionalProducer<TransactionDTO> kafkaTransactionalProducer;
+    @Qualifier("transactionRepositoryTransactionService")
+    private final TransactionRepository transactionRepository;
+    private final KafkaTransactionalProducer<TransactionDTO> kafkaTransactionalProducer;
 
     public TransactionAcceptService(
             TransactionRepository transactionRepository,

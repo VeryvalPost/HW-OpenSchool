@@ -2,6 +2,7 @@ package ru.t1.java.service2.kafka;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.KafkaHeaders;
@@ -25,6 +26,7 @@ public class KafkaTransactionConsumer {
     private TransactionAcceptService transactionAcceptService;
 
     @Autowired
+    @Qualifier("accountRepositoryTransactionService")
     private AccountRepository accountRepository;
 
     @KafkaListener(id = "${spring.kafka.consumer.group-id}-transactions",
