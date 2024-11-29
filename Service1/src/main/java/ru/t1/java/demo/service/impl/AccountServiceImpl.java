@@ -22,7 +22,8 @@ import ru.t1.java.demo.repository.TransactionRepository;
 import ru.t1.java.demo.service.UnblockService;
 import ru.t1.java.demo.util.AccountMapper;
 import ru.t1.java.demo.web.UnblockWebService;
-
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Counter;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,29 +45,40 @@ public class AccountServiceImpl implements AccountService, UnblockService {
     @Qualifier("mainClientRepository")
     private final ClientRepository clientRepository;
 
+
+    private final Counter unblockAttemptsCounter;
+    private final Counter unblockSuccessCounter;
+    private final Counter unblockFailCounter;
+
     private final KafkaAccountProducer<AccountDTO> kafkaAccountProducer;
     private final UniqueIdGeneratorService idGenerator;
 
     private final TransactionRepository transactionRepository;
 
     private final UnblockWebService unblockWebService;
+
     @Autowired
     public AccountServiceImpl(AccountRepository accountRepository,
                               ClientRepository clientRepository,
                               TransactionRepository transactionRepository,
                               KafkaAccountProducer<AccountDTO> kafkaAccountProducer,
-                                UniqueIdGeneratorService idGenerator,
-                              UnblockWebService unblockWebService) {
+                              UniqueIdGeneratorService idGenerator,
+                              UnblockWebService unblockWebService,
+                              MeterRegistry meterRegistry
+    ) {
         this.accountRepository = accountRepository;
         this.clientRepository = clientRepository;
         this.transactionRepository = transactionRepository;
-        this.kafkaAccountProducer =kafkaAccountProducer;
+        this.kafkaAccountProducer = kafkaAccountProducer;
         this.idGenerator = idGenerator;
         this.unblockWebService = unblockWebService;
+        this.unblockAttemptsCounter = meterRegistry.counter("account.unblock.attempts");
+        this.unblockSuccessCounter = meterRegistry.counter("account.unblock.success");;
+        this.unblockFailCounter = meterRegistry.counter("account.unblock.fail");
     }
 
 
-   // @PostConstruct
+    // @PostConstruct
     void init() {
         try {
             List<Account> accounts = parseJson();
@@ -75,19 +87,20 @@ public class AccountServiceImpl implements AccountService, UnblockService {
             log.error("Ошибка во время обработки записей", e);
         }
     }
+
     @Override
     public Account createAccount(Account account, String globalClientId) {
         try {
-        Optional<Client> clientOpt = clientRepository.findClientByGlobalId(globalClientId);
-        if (clientOpt.isPresent()) {
-            Client currentClient = clientOpt.get();
-            account.setClient(currentClient);
-            account.setGlobalAccountId(idGenerator.generateId(EntityType.ACCOUNT));
+            Optional<Client> clientOpt = clientRepository.findClientByGlobalId(globalClientId);
+            if (clientOpt.isPresent()) {
+                Client currentClient = clientOpt.get();
+                account.setClient(currentClient);
+                account.setGlobalAccountId(idGenerator.generateId(EntityType.ACCOUNT));
 
-            return accountRepository.save(account);
-        } else {
-            throw new ClientException("Клиент с ID " + globalClientId + " не найден");
-        }
+                return accountRepository.save(account);
+            } else {
+                throw new ClientException("Клиент с ID " + globalClientId + " не найден");
+            }
         } catch (DataAccessException e) {
             log.error("Ошибка обращения к базе данных при создании аккаунта для клиента с ID: {}", globalClientId, e);
             throw new AccountException("Не получилось создать аккаунт пользователя, ошибка БД:", e);
@@ -129,8 +142,8 @@ public class AccountServiceImpl implements AccountService, UnblockService {
         }
     }
 
-   @Override
-   public List<Transaction> findAllAccountTransactions(String globalAccountId) {
+    @Override
+    public List<Transaction> findAllAccountTransactions(String globalAccountId) {
         try {
             List<Transaction> transactions = transactionRepository.findAllTransactionByGlobalAccountId(globalAccountId);
             if (transactions == null || transactions.isEmpty()) {
@@ -147,9 +160,9 @@ public class AccountServiceImpl implements AccountService, UnblockService {
     @Override
     public List<Account> parseJson() throws IOException {
 
-            ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = new ObjectMapper();
 
-            AccountDTO[] accounts = mapper.readValue(new File("src/main/resources/ACCOUNT_DATA.json"), AccountDTO[].class);
+        AccountDTO[] accounts = mapper.readValue(new File("src/main/resources/ACCOUNT_DATA.json"), AccountDTO[].class);
 
         return Arrays.stream(accounts)
                 .map(dto -> {
@@ -158,23 +171,23 @@ public class AccountServiceImpl implements AccountService, UnblockService {
                     return AccountMapper.toEntity(dto, client);
                 })
                 .collect(Collectors.toList());
-        }
+    }
 
 
-// Сделано для тестирования producer и consumer Kafka
+    // Сделано для тестирования producer и consumer Kafka
     public void sendAccountToKafka() {
         // Пример отправки в Kafka
-     //   AccountDTO accountDTO = new AccountDTO(1710L, "OPEN","DEBIT", 156.0, 2L);
-       // kafkaAccountProducer.sendTo(topic, accountDTO);
-        }
+        //   AccountDTO accountDTO = new AccountDTO(1710L, "OPEN","DEBIT", 156.0, 2L);
+        // kafkaAccountProducer.sendTo(topic, accountDTO);
+    }
 
-        /*
-        К заданию №4
-                 */
+    /*
+    К заданию №4
+             */
     @Override
     public void blockAccount(String globalAccountId) {
         Optional<Account> optAccount = accountRepository.findAccountByGlobalAccountId(globalAccountId);
-        if (optAccount.isPresent()){
+        if (optAccount.isPresent()) {
             Account account = optAccount.get();
             account.setStatus(AccountStatus.BLOCKED);
             accountRepository.save(account);
@@ -209,17 +222,27 @@ public class AccountServiceImpl implements AccountService, UnblockService {
 
     @Override
     public List<String> collectUnblockList() {
-        List<Account> blockedAccounts = accountRepository.findTopNByStatus(AccountStatus.BLOCKED, accountQty);
+        List<Account> blockedAccounts = accountRepository.findTopNByStatus(AccountStatus.BLOCKED.name(), accountQty);
 
         if (blockedAccounts.isEmpty()) {
             return new ArrayList<>();
         }
 
+        unblockAttemptsCounter.increment();
+
         List<String> accountIds = blockedAccounts.stream()
                 .map(Account::getGlobalAccountId)
                 .toList();
 
-        List<String> unblockedIds = unblockWebService.unblockList(accountIds);
+        List<String> unblockedIds;
+        try {
+            unblockedIds = unblockWebService.unblockList(accountIds);
+            unblockSuccessCounter.increment(unblockedIds.size());
+        } catch (Exception e) {
+            unblockFailCounter.increment();
+            throw new RuntimeException("Ошибка при разблокировке аккаунтов", e);
+        }
+
 
         return unblockedIds;
     }

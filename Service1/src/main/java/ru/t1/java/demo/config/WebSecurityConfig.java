@@ -76,6 +76,7 @@ public class WebSecurityConfig {
                                .requestMatchers("/transactions**").authenticated()
                                .requestMatchers("/client**").authenticated()
                                 .requestMatchers("/api/checkClient**").authenticated()
+                                .requestMatchers("/api/unblock**").authenticated()
                                 .requestMatchers("/static/**", "/public/**", "/css/**", "/js/**").permitAll()
                                 .anyRequest().permitAll()
                 );

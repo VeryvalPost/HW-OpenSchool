@@ -2,6 +2,8 @@ package ru.t1.java.service3.controller;
 
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.t1.java.service3.dto.UnblockRequest;
@@ -15,7 +17,6 @@ import java.util.List;
 @Slf4j
 public class UnblockListController {
 
-
     ListUnblockService unblockService;
 
     public UnblockListController(ListUnblockService unblockService) {
@@ -26,9 +27,7 @@ public class UnblockListController {
     public ResponseEntity<UnblockResponse> check(@RequestBody UnblockRequest unblockRequest) {
 
         log.info("Поступил перечень на разблокировку {}", unblockRequest.getGlobalIdList());
-
         List<String> unblockedList = unblockService.unblock(unblockRequest.getGlobalIdList());
-
 
         UnblockResponse response = UnblockResponse.builder()
                 .unblockedList(unblockedList)

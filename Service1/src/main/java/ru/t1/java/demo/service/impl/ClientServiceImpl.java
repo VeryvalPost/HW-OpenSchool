@@ -1,7 +1,7 @@
 package ru.t1.java.demo.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
+import io.micrometer.core.instrument.Counter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
@@ -16,6 +16,8 @@ import ru.t1.java.demo.service.UnblockService;
 import ru.t1.java.demo.service.UniqueIdGeneratorService;
 import ru.t1.java.demo.util.ClientMapper;
 import ru.t1.java.demo.web.UnblockWebService;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Counter;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,7 +29,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
+
 public class ClientServiceImpl implements ClientService, UnblockService {
     private final ClientRepository clientRepository;
     private final UniqueIdGeneratorService generatorService;
@@ -35,7 +37,24 @@ public class ClientServiceImpl implements ClientService, UnblockService {
     @Value("${unblock.clients}")
     private int clientQty;
 
-   // @PostConstruct
+    private final Counter unblockAttemptsCounter;
+    private final Counter unblockSuccessCounter;
+    private final Counter unblockFailCounter;
+
+    public ClientServiceImpl(ClientRepository clientRepository,
+                             UniqueIdGeneratorService generatorService,
+                             UnblockWebService unblockWebService,
+                             MeterRegistry meterRegistry) {
+        this.clientRepository = clientRepository;
+        this.generatorService = generatorService;
+        this.unblockWebService = unblockWebService;
+        this.unblockAttemptsCounter = meterRegistry.counter("client.unblock.attempts");;
+        this.unblockSuccessCounter = meterRegistry.counter("client.unblock.success");
+        this.unblockFailCounter = meterRegistry.counter("client.unblock.fail");;
+    }
+
+
+    // @PostConstruct
     void init() {
         try {
             List<Client> clients = parseJson();
@@ -97,12 +116,21 @@ public class ClientServiceImpl implements ClientService, UnblockService {
         if (blockedClients.isEmpty()) {
             return new ArrayList<>();
         }
-
+        unblockAttemptsCounter.increment();
         List<String> clientIds = blockedClients.stream()
                 .map(Client::getGlobalId)
                 .toList();
 
-        List<String> unblockedIds = unblockWebService.unblockList(clientIds);
+        List<String> unblockedIds;
+
+
+        try {
+            unblockedIds = unblockWebService.unblockList(clientIds);
+            unblockSuccessCounter.increment(unblockedIds.size());
+        } catch (Exception e) {
+            unblockFailCounter.increment();
+            throw new RuntimeException("Ошибка при разблокировке аккаунтов", e);
+        }
 
         return unblockedIds;
     }

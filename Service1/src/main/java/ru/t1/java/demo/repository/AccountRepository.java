@@ -18,5 +18,5 @@ public interface AccountRepository extends JpaRepository<Account,Long> {
 
     Optional<Account> findAccountByGlobalAccountId (String globalId);
     @Query(value = "SELECT * FROM account WHERE status = :status LIMIT :limit", nativeQuery = true)
-    List<Account> findTopNByStatus(@Param("status") AccountStatus status, @Param("limit") int limit);
+    List<Account> findTopNByStatus(@Param("status") String status, @Param("limit") int limit);
 }

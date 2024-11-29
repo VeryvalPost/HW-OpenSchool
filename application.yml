@@ -3,8 +3,8 @@ spring:
     name: t1-demo
 
   datasource:
-    url: "jdbc:postgresql://192.168.43.48:5432/t1_demo"
-    #url: "jdbc:postgresql://192.168.3.155:5432/t1_demo"
+    #url: jdbc:postgresql://192.168.3.155:5432/t1_demo
+    url: jdbc:postgresql://192.168.43.48:5432/t1_demo
     username: "postgres"
     password: "123"
     driverClassName: org.postgresql.Driver
@@ -72,6 +72,15 @@ unblock:
   clients: 1
   period: 3600
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include : health,info, metrics
+  metrics:
+    export:
+      prometheus:
+        enabled: true
 
 
 DemoAnnotationStarter:
@@ -83,6 +92,7 @@ DemoAnnotationStarter:
     consumer:
       group-id: t1-demo
   datasource:
+    #url: jdbc:postgresql://192.168.3.155:5432/t1_demo
     url: jdbc:postgresql://192.168.43.48:5432/t1_demo
     username: "postgres"
     password: "123"

@@ -31,7 +31,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**") // Разрешить для всех путей
-                .allowedOriginPatterns("localhost")
+                .allowedOrigins("http://localhost")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Разрешить перечисленные HTTP-методы
                 .allowedHeaders("*") // Разрешить любые заголовки
                 .allowCredentials(true); // Разрешить передачу cookies
